@@ -1,0 +1,27 @@
+import pygame,sys,random
+pygame.init();W,H=500,400;win=pygame.display.set_mode((W,H))
+ship=pygame.Rect(W//2-25,H-40,50,20);bullets=[];enemies=[];clock=pygame.time.Clock()
+font=pygame.font.SysFont("Arial",24);score=0;game_over=False
+while True:
+    for e in pygame.event.get():
+        if e.type==pygame.QUIT:pygame.quit();sys.exit()
+        if not game_over and e.type==pygame.KEYDOWN and e.key==pygame.K_SPACE:
+            bullets.append(pygame.Rect(ship.centerx-2,ship.y,4,10))
+    keys=pygame.key.get_pressed()
+    if not game_over:
+        if keys[pygame.K_LEFT]and ship.x>0:ship.x-=5
+        if keys[pygame.K_RIGHT]and ship.x<W-50:ship.x+=5
+        if random.randint(1,40)==1:enemies.append(pygame.Rect(random.randint(0,W-30),0,30,20))
+    win.fill((0,0,20))
+    if not game_over:pygame.draw.rect(win,(0,200,255),ship)
+    for b in bullets[:]:
+        b.y-=7;pygame.draw.rect(win,(255,255,0),b)
+        if b.y<0:bullets.remove(b)
+    for en in enemies[:]:
+        en.y+=3;pygame.draw.rect(win,(255,0,0),en)
+        if en.colliderect(ship):game_over=True
+        for b in bullets[:]:
+            if en.colliderect(b):enemies.remove(en);bullets.remove(b);score+=1;break
+    win.blit(font.render(f"Score: {score}",1,(255,255,255)),(10,10))
+    if game_over:win.blit(font.render("GAME OVER",1,(255,0,0)),(W//2-70,H//2))
+    pygame.display.flip();clock.tick(60)
